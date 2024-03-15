@@ -1,0 +1,171 @@
+---
+title: Basic Usage
+description: Barebones usage
+---
+
+## Basic Usage
+
+We'll jump right in with a basic example of how to use the library. One thing to note is that I don't know Japanes, I'm trusting DeepL for this.
+
+Let's do this in segments:
+
+### 1. Import the library
+```ts
+import { LocaleKit } from "@locale-kit/locale-kit";
+```
+
+### 2. Define a new instance of LocaleKit
+Define a new instance of LocaleKit, we've pre-defined a few keys in both Japanese and in English. A couple keys have dynamic string replacement with fallback values.
+You can tell that the `home.title` key has a dynamic string replacement with a fallback value of `random user`. The general format of dynamic strings that aren't part of overarching conditional strings is \{\{ arg \}\}||fallback value||
+
+Arg in the above example can be any of the following formats:
+- str: \`random string\` - A random string value. This wouldn't need a fallback as this can't really be null
+- key: \`random.key\` - A key to in the context object passed in to the format/translate isFunctionExpression. This can be deeply nested and even supports array indexes. Under the hood, we use our own `getNestedKey` function to facilitate this. This function is also used in the definition of the language isExternalModuleReference. It's used in tandem with a custom built object flattening function though.
+- bool: true - A boolean value.
+- num: 123 - A number value.
+- fn: (nested.function.key)[num: 123, str: "random"] - This will run whatever function you provide in the functions object. It will provide any paramters you pass in. We'll cover this in a different page
+> For more info on these, check out the [Function Expressions](/function-expressions) page
+
+{/* TODO: Add page link */}
+```ts
+const lang = new LocaleKit({
+	languages: {
+		en: {
+			common: {
+				navbar: {
+					home: "Home",
+					about: "About",
+					contact: "Contact",
+				},
+				footer: {
+					rights: "All rights reserved",
+				},
+			},
+			home: {
+				title: "Hey there, {{key:'user.name'}}||random user||!",
+				subtitle: "Welcome to our website",
+				description: "This is a simple website",
+			},
+			about: {
+				title: "About us",
+				description: "We are a small team",
+			},
+		},
+		jp: {
+			common: {
+				navbar: {
+					home: "ホーム",
+					about: "約",
+					contact: "接触",
+				},
+				footer: {
+					rights: "全著作権所有",
+				},
+			},
+			home: {
+				title: "こんにちは {{key:'user.name'}}||ランダムユーザー||!",
+				subtitle: "私たちのウェブサイトへようこそ",
+				description: "これはシンプルなウェブサイトです",
+			},
+			about: {
+				title: "私たちについて",
+				description: "私たちは小さなチームです",
+			},
+		},
+	},
+	fallback_language: "en",
+});
+```
+
+### 3. Use the `.t` function to localise things
+
+One thing to note here is that in the context object we pass in, we can give the language we want to use. If we don't, it will default to the language we defined in the constructor as . If we don't pass in a user object, it will default to the fallback value we defined in the initial definition with the key `fallback_language`.
+```ts
+console.log(lang.t("home.title", { user: { name: "Steve" } })); // "Hey there, Steve!"
+console.log(lang.t("home.title", { user: {} })); // "Hey there, random user!"
+console.log(lang.t("home.title", { user: { name: "Steve" }, lang: "jp" })); // "こんにちは Steve!"
+console.log(lang.t("home.title", { user: {}, lang: "jp" })); // "こんにちは ランダムユーザー!"
+```
+
+### 4. Dedicated language function
+
+If you need a specific language bound to a function for whatever reason, you can use LocaleKit's helper function `.getTranslationFunc`. This will return a specific function that defaults to the language you pass in.
+
+```ts
+const jpFunc = lang.getTranslationFunc("jp");
+
+console.log(jpFunc("home.title", { user: { name: "Steve" } })); // "こんにちは Steve!"
+console.log(jpFunc("home.title", { user: {} })); // "こんにちは ランダムユーザー!"
+```
+
+### 5. Putting it all together
+
+```ts
+// IMport the library
+import { LocaleKit } from "@locale-kit/locale-kit";
+
+// Defining our languages
+const lang = new LocaleKit({
+	languages: {
+		en: {
+			common: {
+				navbar: {
+					home: "Home",
+					about: "About",
+					contact: "Contact",
+				},
+				footer: {
+					rights: "All rights reserved",
+				},
+			},
+			home: {
+				title: "Hey there, {{key:'user.name'}}||random user||!",
+				subtitle: "Welcome to our website",
+				description: "This is a simple website",
+			},
+			about: {
+				title: "About us",
+				description: "We are a small team",
+			},
+		},
+		jp: {
+			common: {
+				navbar: {
+					home: "ホーム",
+					about: "約",
+					contact: "接触",
+				},
+				footer: {
+					rights: "全著作権所有",
+				},
+			},
+			home: {
+				title: "こんにちは {{key:'user.name'}}||ランダムユーザー||!",
+				subtitle: "私たちのウェブサイトへようこそ",
+				description: "これはシンプルなウェブサイトです",
+			},
+			about: {
+				title: "私たちについて",
+				description: "私たちは小さなチームです",
+			},
+		},
+	},
+	fallback_language: "en",
+});
+
+// Testing out our translations
+console.log(lang.t("home.title", { user: { name: "Steve" } })); // "Hey there, Steve!"
+console.log(lang.t("home.title", { user: {} })); // "Hey there, random user!"
+console.log(lang.t("home.title", { user: { name: "Steve" }, lang: "jp" })); // "こんにちは Steve!"
+console.log(lang.t("home.title", { user: {}, lang: "jp" })); // "こんにちは ランダムユーザー!"
+
+// Testing out our dedicated language function
+const jpFunc = lang.getTranslationFunc("jp");
+
+console.log(jpFunc("home.title", { user: { name: "Steve" } })); // "こんにちは Steve!"
+console.log(jpFunc("home.title", { user: {} })); // "こんにちは ランダムユーザー!"
+```
+
+## Summary
+
+Wrapping up for now, you can see how you'd go about localising your application with the library. We've covered the basic usage of the library and how to use the `.t` function to localise your strings. We've also covered how to use the `.getTranslationFunc` function to get a dedicated language bound function. Some things not covered here: dynamic case matching, predefined match cases, argument/parameter types, etc. We'll cover those in different pages.

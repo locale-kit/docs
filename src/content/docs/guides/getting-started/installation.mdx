@@ -15,27 +15,29 @@ as simple as using your favourite package manager to add the library to your pro
 <Tabs>
 <TabItem label="npm">
 ```sh
-npm install --save @locale-kit/locale-kit
+npx jsr add @locale-kit/locale-kit
 ```
 </TabItem>
 
 <TabItem label="pnpm">
 ```sh
-pnpm add @locale-kit/locale-kit
+pnpm dlx jsr add @locale-kit/locale-kit
 ```
 </TabItem>
 
 <TabItem label="Yarn">
 ```sh
-yarn add @locale-kit/locale-kit
+yarn dlx jsr add @locale-kit/locale-kit
 ```
 </TabItem>
 <TabItem label="Deno">
-When it comes to Deno, it's even easier. All you need to do is import the module from the URL.
-```ts
-import { LocaleKit } from 'https://deno.land/x/localekit/mod.ts';
-
-// ...
+```sh
+deno add @locale-kit/locale-kit
+```
+</TabItem>
+<TabItem label="Bun">
+```sh
+bunx jsr add @locale-kit/locale-kit
 ```
 </TabItem>
 </Tabs>

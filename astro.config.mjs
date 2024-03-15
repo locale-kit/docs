@@ -24,8 +24,8 @@ export default defineConfig({
                   link: "/guides/getting-started/installation/",
                 },
                 {
-                  label: "Configuration",
-                  link: "/guides/getting-started/configuration/",
+                  label: "Basic Usage",
+                  link: "/guides/getting-started/basic-usage/",
                 },
               ],
             },
