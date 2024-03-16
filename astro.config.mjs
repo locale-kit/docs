@@ -35,6 +35,10 @@ export default defineConfig({
           label: "Reference",
           autogenerate: { directory: "reference" },
         },
+        {
+          label: "Usage",
+          autogenerate: { directory: "usage" },
+        },
       ],
     }),
   ],

@@ -1,0 +1,224 @@
+---
+title: Dynamic Match Cases
+description: Predefined match cases for dynamic strings
+---
+
+
+## Match Cases
+
+LocaleKit comes with a set of predefined match cases for dynamic strings. These
+are used primarily for things like plurals, optional strings, etc.
+
+The format is outline in the matcher documentation. { /* TODO: put link to dynamic matcher */}
+But the simple layout is as follows:
+
+```js
+[[~
+  { match.key }
+  CASE1(...args) "case content 1"
+  | CASE2(...args) "case content 2"
+  | default: "default content"
+~]]
+```
+
+Here, the `match.key` is the key in the provided context object to match, and the `CASE`
+is the name of the case to match. The `args` are the arguments to pass to the case function
+to compare agains. `default` is an optional default case value to use if no other match is found.
+
+Again, more information can be found in the matcher documentation. { /* TODO: put link to dynamic matcher */}
+
+export const v = 'v';
+export const lv = 'v_len';
+export const op = (op) => <>{op}</>
+export const red = 'params.reduce((a, p) => a + p, 0)';
+
+## Cases
+For ease of access, we'll outline all the predefined cases and what they do. They're all fairly self-explanatory.
+
+### First a glossary
+- `v` is the value to compare against, this is passed in from the key in the context object.
+  > <code>[[~ <span style="color: var(--sl-color-text-accent)">\{data.key\}</span> CASE: "..." ~]]</code>
+- `v_len` is the length of the afformentioned value passed in. This is handled internally by the `getLen`
+  function using the following logic:
+  - val is a string: `val.length`
+  - val is an array: `val.length`
+  - val is an object: `Object.keys(val).length`
+  - val is a number: `val`
+  - val is a big_int: `val < Number.MAX_SAFE_INTEGER ? val : Number.NaN`
+  - anything else: `Number.NaN`
+  > **NOTE**: *If the returned value is Number.NaN, the case will return false.*
+- `p` is the array of parameters passed in with a few constraints/changes:
+  - `...p`: In the case where it's a direct comparison, these are expected to be numbers and will have a
+    `reduce()` function ran on them adding all the values together, filtering non-numbers.
+  - `[p1, p2]`: If the function expects two values in the params array (e.g. `IN`, `BETWEEN`, etc.), then all
+    other values past index 0 and index 1 will be discarded.
+  - `[p1]`: Same as `[p1, p1]`, but means only a single parameter is expected, so only index 0 is kept.
+
+### The Cases
+| Case       | Value       | Operator                        | Params   | 
+| ---------- | -----------:|:-------------------------------:|:-------- |
+| GT         | v           | {op('>')}                       | ...p     |
+| GTE        | v           | {op('>=')}                      | ...p     |
+| NGT        | v           | {op('!>')}                      | ...p     |
+| NGTE       | v           | {op('!>=')}                     | ...p     |
+| LEN_GT     | {lv}        | {op('>')}                       | ...p     |
+| LEN_GTE    | {lv}        | {op('>=')}                      | ...p     |
+| LEN_NGT    | {lv}        | {op('!>')}                      | ...p     |
+| LEN_NGTE   | {lv}        | {op('!>=')}                     | ...p     |
+| LT         | v           | {op('<')}                       | ...p     |
+| LTE        | v           | {op('<=')}                      | ...p     |
+| NLT        | v           | {op('!<')}                      | ...p     |
+| NLTE       | v           | {op('!<=')}                     | ...p     |
+| LEN_LT     | {lv}        | {op('<')}                       | ...p     |
+| LEN_LTE    | {lv}        | {op('<=')}                      | ...p     |
+| LEN_NLT    | {lv}        | {op('!<')}                      | ...p     |
+| LEN_NLTE   | {lv}        | {op('!<=')}                     | ...p     |
+| EQ         | v           | {op('===')}                     | [p1]     |
+| NEQ        | v           | {op('!=')}                      | [p1]     |
+| LEN_EQ     | {lv}        | {op('===')}                     | [p1]     |
+| LEN_NEQ    | {lv}        | {op('!==')}                     | [p1]     |
+| BT         | v           | {op('(v > p1 && v < p2)')}      | [p1, p2] |
+| BTE        | v           | {op('(v >= p1 && v <= p2)')}    | [p1, p2] |
+| NBT        | v           | {op('!(v > p1 && v < p2)')}     | [p1, p2] |
+| NBTE       | v           | {op('!(v >= p1 && v <= p2)')}   | [p1, p2] |
+| LEN_BT     | {lv}        | {op('(lv > p1 && lv < p2)')}    | [p1, p2] |
+| LEN_BTE    | {lv}        | {op('(lv >= p1 && lv <= p2)')}  | [p1, p2] |
+| LEN_NBT    | {lv}        | {op('!(lv > p1 && lv < p2)')}   | [p1, p2] |
+| LEN_NBTE   | {lv}        | {op('!(lv >= p1 && lv <= p2)')} | [p1, p2] |
+| IN         | v           | {op('in')}                      | ...p     |
+| NIN        | v           | {op('!in')}                     | ...p     |
+| LEN_IN     | {lv}        | {op('in')}                      | [p1]     |
+| LEN_NIN    | {lv}        | {op('!in')}                     | [p1]     |
+| AND        | v           | {op('all_truthy')}              | ...p     |
+| OR         | v           | {op('\|\|')}                    | ...p     |
+| XOR        | v           | {op('one_truthy')}              | ...p     |
+| CUSTOM     | v           | {op('all_truthy(!inc v)')}      | ...p     |
+| [key]      | v           | {op('===')}                     | [p1]     |
+
+With the `IN` and `NIN` cases, you can pass in whatever you want to compare against,
+the function will run `[].flat(1)` on the parameters array though, so if you have the
+parameters: [1, 2, [3, 4]], it will be flattened to [1, 2, 3, 4]; However, if you have
+the parameters: [1, 2, [3, [4, 5]]], it will be flattened to [1, 2, 3, [4, 5]].
+
+The `[key]` case is a special case that allows you to match against strings (and technically
+numbers) arbitrarily.
+<br />
+Values are stringified using `String(v)` and then compared against the provided value. This is
+done only if no other case matched/returned true. This is the default case if no other case
+matched and if no default case is provided.
+
+## Examples
+
+Instead of using the `.t` function, we'll be using the `parseString` function directly for example
+purposes. This is done for you already if you use the `.t` function. `parseString` is exposed as
+a helper utility if you need to do some dynamic replacement without wanting to define a whole key
+in your language config.
+
+
+### Example 1: Simple Comparison
+```js
+import { parseString } from "@locale-kit/locale-kit";
+
+const context = {
+	key: 5,
+  name: 'Rick',
+	data: {
+		key: 5,
+	},
+	params: [1, 2, 3, 4, 5],
+};
+
+const string1 = parseString(
+	`This string has a length that is [[~
+    {data.key}
+    GT(num: 4): "longer than 4"
+    | default: "less than or equal to 4"
+  ~]] characters.`,
+	context,
+);
+
+const string2 = parseString(
+	`This strings length [[~
+    {key}
+    IN(key: 'params'): "is"
+    | default: "isn't"
+  ~]] contained in the 'params' array.`,
+	context,
+);
+
+const string3 = parseString(
+  `Don't worry, [[~
+    {name}
+    Rick: "'never gonna give you up'"
+    | default: "you're safe"
+  ~]]...`,
+  context,
+);
+
+console.log(string1); // "This string has a length that is longer than 4 characters."
+console.log(string2); // "This strings length is contained in the 'params' array."
+console.log(string3); // "Don't worry, 'never gonna give you up'..."
+```
+
+### Example 2: Custom Comparison
+When we say custom, we mean `anything that ends up being truthy`. This can be a function, a string, a number, etc.
+Whatever functions are passed in as the third parameter to the `parseString` function (the `.t` function  is the same)
+will be available to the match cases. This is useful for more complex comparisons that don't fit into the predefined cases.
+
+```js
+import { parseString, Is } from "@locale-kit/locale-kit";
+
+const context = {
+  values: [2, 5, 9, 0, -1],
+  params: [1, 2, 3, 4, 5],
+};
+
+const fns = {
+  sharedPair: ({value, params}) => {
+
+    // If Value isn't an array, return false
+    if (!Is.isArray(value)) return false;
+
+    // Check if at least two elements are shared between the two arrays
+    return value.filter((n) => params.includes(n)).length >= 2;
+  }
+}
+
+const string1 = parseString(
+  `Let's see... [[~
+    {values}
+    CUSTOM(fn: [sharedPair]|key: 'params'|): "We share a pair!"
+    | default: "We have nothing in common :("
+  ~]]`,
+  context,
+  fns
+);
+
+console.log(string1); // Let's see... We share a pair!
+```
+
+### Example 3: Match cases with dynamic strings
+It's completely fine and possible to also include dynamic strings within the match cases. These are evaluated after the match cases in a string are selected. These are explored further in the dynamic strings documentation. { /* TODO: put link to dynamic strings */}
+```js
+import { parseString } from "@locale-kit/locale-kit";
+
+const context = {
+  key: 5,
+  name: 'Rick',
+  data: {
+    key: 5,
+  },
+  params: [1, 2, 3, 4, 5],
+};
+
+const string1 = parseString(
+  `This string has a length that is [[~
+    {data.key}
+    GT(num: 4): "longer than 4 (I see {{key:'data.key'}})"
+    | default: "less than or equal to 4 (I guess there's {{key:'data.key'}} of 'em)"
+  ~]]`,
+  context,
+);
+
+console.log(string1); // "This string has a length that is longer than 4 (I see 5)"
+```
