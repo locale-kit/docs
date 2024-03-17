@@ -1,0 +1,21 @@
+---
+title: Dynamic String Replacement
+description: String replacement using dynamic values
+---
+import Link from '@components/Link.svelte'
+export const param = (file_name) => `reference/param-types/${file_name}/`;
+
+# Dynamic String Replacement
+
+While the <Link href="usage/dynamic/match/">matcher feature</Link> is powerful, the real magic happens when you're able to insert your own content or variables into a string. This is where dynamic string replacement comes in.
+
+Dynamic replacements are performed with the following syntaxes (links to the relavent parameter documentation):
+
+- **Basic (<Link href={param('string')}>String</Link>)**: `{{str: "I'm a randome string"}}`
+- **Basic with fallback**: `{{str: "I'm a randome string"}}||Fallback string||}}`
+- **<Link href={param('number')}>Number</Link>**: `{{num: 123}}`
+- **<Link href={param('boolean')}>Boolean</Link>**: `{{bool: true}}`
+- **<Link href={param('function')}>Function</Link>**: `{{fn: [nested.function.key]|str: 'hi'|}}`
+- **<Link href={param('key')}>Context Key/Value</Link>**: `{{key: 'nested.data.key'}}`
+
+When it comes to the function and key types, they're taken from the context object and functions object passed in respectively.

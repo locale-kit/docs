@@ -2,6 +2,8 @@
 title: Basic Usage
 description: Barebones usage
 ---
+import Link from '@components/Link.svelte'
+export const param = (file_name) => `reference/param-types/${file_name}/`;
 
 ## Basic Usage
 
@@ -22,14 +24,13 @@ Define a new instance of LocaleKit, we've pre-defined a few keys in both Japanes
 You can tell that the `home.title` key has a dynamic string replacement with a fallback value of `random user`. The general format of dynamic strings that aren't part of overarching conditional strings is \{\{ arg \}\}||fallback value||
 
 Arg in the above example can be any of the following formats:
-- str: \`random string\` - A random string value. This wouldn't need a fallback as this can't really be null
-- key: \`random.key\` - A key to in the context object passed in to the format/translate isFunctionExpression. This can be deeply nested and even supports array indexes. Under the hood, we use our own `getNestedKey` function to facilitate this. This function is also used in the definition of the language isExternalModuleReference. It's used in tandem with a custom built object flattening function though.
-- bool: true - A boolean value.
-- num: 123 - A number value.
-- fn: (nested.function.key)[num: 123, str: "random"] - This will run whatever function you provide in the functions object. It will provide any paramters you pass in. We'll cover this in a different page
-> For more info on these, check out the [Function Expressions](/function-expressions) page
+- <Link href={param('string')}>`str: "random string"`</Link> - A random string value. This wouldn't need a fallback as this can't really be null
+- <Link href={param('boolean')}>`bool: true`</Link> - A boolean value.
+- <Link href={param('number')}>`num: 123`</Link> - A number value.
+- <Link href={param('key')}>`key: "random.key"`</Link> - A key to in the context object passed in to the format/translate function. This can be deeply nested and even supports array indexes. Under the hood, we use our own [`getNestedKey`](https://jsr.io/@locale-kit/locale-kit/2.2.0/util/obj.ts) function to facilitate this. This function is also used in the definition of the language isExternalModuleReference. It's used in tandem with a custom built object flattening function though.
+- <Link href={param('function')}>`fn: (nested.function.key)[num: 123, str: "random"]`</Link> - This will run whatever function you provide in the functions object. It will provide any paramters you pass in. We'll cover this in a different page.
+	> For more info on functions, check out the <Link href="reference/param-types/function">Function Expressions</Link> page
 
-{/* TODO: Add page link */}
 ```ts
 const lang = new LocaleKit({
 	languages: {

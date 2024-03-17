@@ -1,0 +1,86 @@
+---
+title: Function
+description: A function parameter type
+sidebar:
+  order: 6
+---
+import Link from '@components/Link.svelte'
+
+## Key
+The function key can match any of the following:
+1. fn
+2. func
+3. function
+
+## Format
+
+Functions are defined as a string with the following format:
+```
+fn: [function.key]|str: 'param 1', num: 2|
+```
+
+## Function Key
+The function option lets you choose any of the available functions passed in to the parseString/.t function.
+The format is `fn: [function.key]` where `[function.key]` is the key of the potentially deeply nested function you want to call in the functions object.
+
+## Parameters
+Parameters are optional and are passed in as an array of pre-parsed (as in, are their parsed values by the time they hit the function) values. These can be any of the parameter types discussed in this category of the documentation. (i.e. string, number, boolean, key, function)
+
+To define parameters, you can use the following format:
+```
+fn: [function.key]'str: "a", num: 2, bool: false, key: "hello", fn: [other.function]'
+```
+
+# DX
+Various bits and pieces are in place to hopefully improve the developer experience with using the function parameter type.
+
+For instance, parameters (this isn't exclusive to the function type) all don't care too much about spaces and newlines. The only real restriction here is that the border of the function key string and the parameters string must be right next to eachother. This means that you can write the following:
+```ts
+parseString(
+  `{{
+    fn: [
+      function.key
+    ]'
+      str: "a",
+      num: 2,
+      bool: false,
+      key: "hello",
+      fn: [other.function]|
+        str: "Hello from within!"
+      |
+    '
+  }}`,
+  {
+    hello: "Hello World!",
+  },
+  {
+    function: {
+      key: ({ params }) => params.join(" "),
+    },
+    other: {
+      function: ({ params: [p0] }) => p0,
+    },
+  },
+)
+```
+and it will be completely valid. The output of that would be `a 2 false Hello World! Hello from within!` for those that are curious.
+Additionally, <Link href="reference/param-types/common/#borders">Common > Borders</Link> and <Link href="reference/param-types/common/#escaping">Common > Escaping</Link> apply here, making it possible to nest function and parameters.
+
+## Signature
+Functions are called with the following signature: 
+```ts
+fn(opts: {
+  // The params passed in to the function. These will be pre-parsed and passed in as an array
+  params: unknown[];
+  // The context object passed in to the parseString/.t function
+  ctx: Record<string, unknown>;
+  // The functions object passed in to the parseString/.t function
+  // This is useful for calling other functions from within the function, this is also where this called function is contained
+  fns: Record<string, Function>;
+  // The value passed in to the function. If this function is being used outside of a matcher, this will almost always be undefined
+  value?: unknown;
+}): unknown
+```
+This allows you to access the context and other functions from within the function.
+
+If you're intending for a function to be used as a matcher, you should probably have it output a string, boolean, or number. This is dependant on what you're using the function in of course. Experimentation is key here.

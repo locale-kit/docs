@@ -1,0 +1,19 @@
+---
+title: Common Among Types
+description: Bits and pieces that are common among multiple types
+sidebar:
+  order: 1
+---
+
+# Borders
+Most of the parameter types that are bordered (i.e. strings, keys, and functions) can be customised for either ease of reading/comprehension, or to make nesting easier without having to [escape](#escaping) border pairs. The borders can be any of the following pairs (start border, end border):
+- `'`, `'`
+- `"`, `"`
+- `\`, \``
+- `[`, `]`
+- `(`, `)`
+- `{`, `}`
+
+# Escaping
+When you need to nest a character that matches the border but don't want it to count as the end of the string, you can escape it with a backslash. A backslash on its own will get removed, so you'll need to escape that too. For example, to include a `"` in a string that uses `"` as its border, you would write `\"`. To include a literal backslash in a string, you'd use a double backslash: `\\`.
+Due to the way strings are handled in JS/TS, you pretty much have to double up backslashes to have them be in the string. So the above become: `\\"` and `\\\\`.

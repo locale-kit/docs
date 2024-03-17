@@ -1,11 +1,13 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import svelte from "@astrojs/svelte";
 
 // https://astro.build/config
 export default defineConfig({
   site: "https://locale-kit.github.io",
   base: "/docs/",
   integrations: [
+    svelte(),
     starlight({
       title: "LocaleKit",
       social: {
@@ -32,12 +34,18 @@ export default defineConfig({
           ],
         },
         {
-          label: "Reference",
-          autogenerate: { directory: "reference" },
-        },
-        {
           label: "Usage",
           autogenerate: { directory: "usage" },
+        },
+        {
+          label: "Reference",
+          autogenerate: { directory: "reference" },
+          items: [
+            {
+              label: "Parameter Types",
+              autogenerate: { directory: "/reference/param-types" },
+            },
+          ],
         },
       ],
     }),
